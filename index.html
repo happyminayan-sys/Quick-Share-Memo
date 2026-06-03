@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Quick Share Memo</title>
-    <!-- Tailwind CSS (CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome (Icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* モバイルブラウザのセーフエリアと高さ調整 */
         :root {
             --sat: env(safe-area-inset-top);
             --sar: env(safe-area-inset-right);
@@ -17,12 +13,17 @@
             --sal: env(safe-area-inset-left);
         }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
             height: 100vh;
-            height: 100dvh; /* モバイルのアドレスバー対策 */
-            margin: 0;
+            height: 100dvh;
             overflow: hidden;
             overscroll-behavior-y: none;
             background-color: #f3f4f6;
@@ -32,7 +33,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            max-width: 48rem; /* max-w-3xl */
+            max-width: 48rem;
             margin-left: auto;
             margin-right: auto;
             background-color: white;
@@ -40,346 +41,565 @@
             position: relative;
         }
 
-        /* カスタムスクロールバー */
-        textarea::-webkit-scrollbar {
-            width: 6px;
-        }
-        textarea::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        textarea::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 20px;
+        /* Header */
+        header {
+            background: white;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            padding-top: calc(12px + var(--sat));
         }
 
-        /* モーダルアニメーション */
+        .header-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-title i {
+            color: #3b82f6;
+            font-size: 20px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            color: #9ca3af;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s, background-color 0.15s, transform 0.1s;
+            font-size: 18px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .icon-btn:hover { background-color: #f1f5f9; }
+        .icon-btn:active { transform: scale(0.88); }
+
+        .icon-btn.diary:hover { color: #10b981; background-color: #ecfdf5; }
+        .icon-btn.time:hover  { color: #3b82f6; background-color: #eff6ff; }
+        .icon-btn.trash:hover { color: #ef4444; background-color: #fef2f2; }
+
+        .divider {
+            width: 1px;
+            height: 16px;
+            background-color: #e5e7eb;
+            margin: 0 4px;
+        }
+
+        #charCount {
+            font-size: 10px;
+            color: #9ca3af;
+            font-family: monospace;
+            min-width: 48px;
+            text-align: right;
+        }
+
+        /* Main */
+        main {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 12px 12px 4px;
+        }
+
+        #memoInput {
+            flex: 1;
+            width: 100%;
+            padding: 16px;
+            font-size: 17px;
+            line-height: 1.7;
+            background-color: rgba(249,250,251,0.5);
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            resize: none;
+            outline: none;
+            color: #1f2937;
+            font-family: inherit;
+            transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+        }
+
+        #memoInput::placeholder { color: #d1d5db; }
+
+        #memoInput:focus {
+            border-color: #bfdbfe;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.05);
+        }
+
+        #memoInput::-webkit-scrollbar { width: 6px; }
+        #memoInput::-webkit-scrollbar-track { background: transparent; }
+        #memoInput::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+
+        /* Footer */
+        footer {
+            background: white;
+            border-top: 1px solid #f1f5f9;
+            padding: 16px;
+            padding-bottom: calc(16px + var(--sab));
+            z-index: 10;
+            flex-shrink: 0;
+            box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.04);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            padding: 14px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 15px;
+            transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            font-family: inherit;
+        }
+
+        .btn:active { transform: scale(0.96); }
+
+        .btn-copy {
+            background-color: #f1f5f9;
+            color: #374151;
+        }
+        .btn-copy:hover { background-color: #e2e8f0; }
+        .btn-copy:active { background-color: #cbd5e1; }
+        .btn-copy.success {
+            background-color: #dcfce7;
+            color: #15803d;
+            transform: scale(1.02);
+        }
+
+        .btn-share {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+        }
+        .btn-share:hover { background-color: #1d4ed8; }
+        .btn-share:active { background-color: #1e40af; box-shadow: none; }
+        .btn-share.success {
+            background-color: #15803d;
+            box-shadow: 0 4px 14px rgba(21,128,61,0.3);
+            transform: scale(1.02);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: calc(90px + var(--sab));
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background-color: #1f2937;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 200;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Modal */
         .modal-overlay {
             opacity: 0;
             visibility: hidden;
-            transition: all 0.2s ease-out;
+            transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
         }
+
         .modal-overlay.active {
             opacity: 1;
             visibility: visible;
         }
+
         .modal-box {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 320px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
             transform: scale(0.95);
             transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
         .modal-overlay.active .modal-box {
             transform: scale(1);
         }
 
-        /* フッターのセーフエリア対応 */
-        .footer-safe {
-            padding-bottom: calc(1rem + var(--sab));
+        .modal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #fef2f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
         }
 
-        /* フェードインアニメーション */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .modal-icon i { color: #dc2626; font-size: 22px; }
+
+        .modal-icon.green { background-color: #dcfce7; }
+        .modal-icon.green i { color: #15803d; }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #111827;
+            text-align: center;
+            margin-bottom: 8px;
         }
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
+
+        .modal-desc {
+            font-size: 13px;
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 24px;
+            line-height: 1.6;
         }
+
+        .modal-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s;
+            font-family: inherit;
+        }
+
+        .modal-btn:active { transform: scale(0.96); }
+
+        .modal-btn-cancel { background-color: #f1f5f9; color: #374151; }
+        .modal-btn-cancel:hover { background-color: #e2e8f0; }
+
+        .modal-btn-confirm { background-color: #dc2626; color: white; }
+        .modal-btn-confirm:hover { background-color: #b91c1c; }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0"
-  }
-}
-</script>
 </head>
 <body>
 
-    <div class="app-container">
-        <!-- Header -->
-        <header class="bg-white border-b border-gray-100 px-4 py-3 flex justify-between items-center z-10 shrink-0 shadow-sm">
-            <h1 class="font-bold text-lg text-gray-700 flex items-center gap-2">
-                <i class="fa-solid fa-pen-nib text-blue-500 text-xl"></i>
-                <span>クイックシェア</span>
-            </h1>
-            <div class="flex items-center gap-1">
-                <!-- 日記ボタン (新規追加) -->
-                <button onclick="app.insertDiary()" class="text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 transition-all p-2 rounded-full active:scale-90" title="日記テンプレートを挿入">
-                    <i class="fa-solid fa-book text-lg"></i>
-                </button>
-                
-                <!-- 日時ボタン -->
-                <button onclick="app.insertTime()" class="text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all p-2 rounded-full active:scale-90" title="日時を挿入">
-                    <i class="fa-regular fa-clock text-xl"></i>
-                </button>
-                
-                <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                <span id="charCount" class="text-[10px] text-gray-400 font-mono w-14 text-right">0文字</span>
-                
-                <!-- 削除ボタン -->
-                <button onclick="app.openDeleteModal()" class="text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all p-2 rounded-full ml-1 active:scale-90" title="削除">
-                    <i class="fa-solid fa-trash-can text-lg"></i>
-                </button>
+<div class="app-container">
+    <!-- Header -->
+    <header>
+        <div class="header-title">
+            <i class="fa-solid fa-pen-nib"></i>
+            <span>クイックシェア</span>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn diary" id="btnDiary" title="日記テンプレートを挿入">
+                <i class="fa-solid fa-book"></i>
+            </button>
+            <button class="icon-btn time" id="btnTime" title="日時を挿入">
+                <i class="fa-regular fa-clock"></i>
+            </button>
+            <div class="divider"></div>
+            <span id="charCount">0文字</span>
+            <button class="icon-btn trash" id="btnTrash" title="削除">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main>
+        <textarea
+            id="memoInput"
+            placeholder="ここに入力して即共有..."
+            spellcheck="false"
+        ></textarea>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <button class="btn btn-copy" id="btnCopy">
+                <i class="fa-regular fa-copy"></i>
+                <span>コピー</span>
+            </button>
+            <button class="btn btn-share" id="btnShare">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>共有する</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- Delete / Post-Action Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box">
+            <div class="modal-icon" id="modalIcon">
+                <i id="modalIconEl" class="fa-solid fa-eraser"></i>
             </div>
-        </header>
-
-        <!-- Main Area -->
-        <main class="flex-1 overflow-hidden flex flex-col p-3 pb-1">
-            <textarea 
-                id="memoInput" 
-                class="flex-1 w-full p-4 text-[17px] leading-relaxed bg-gray-50/50 rounded-2xl border border-gray-100 focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-500/5 transition-all resize-none outline-none placeholder-gray-300"
-                placeholder="ここに入力して即共有..."
-                spellcheck="false"
-            ></textarea>
-        </main>
-
-        <!-- Footer -->
-        <footer class="bg-white border-t border-gray-100 p-4 footer-safe z-10 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <div class="grid grid-cols-5 gap-3">
-                <button onclick="app.copyToClipboard()" class="col-span-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 group active:scale-95">
-                    <i class="fa-regular fa-copy group-active:scale-90 transition-transform text-lg"></i>
-                    <span>コピー</span>
-                </button>
-                <button onclick="app.shareText()" class="col-span-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 active:scale-95">
-                    <i class="fa-solid fa-paper-plane text-lg"></i>
-                    <span>共有する</span>
-                </button>
-            </div>
-        </footer>
-
-        <!-- Delete Confirmation Modal -->
-        <div id="deleteModal" class="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-[2px] z-[100] flex items-center justify-center p-6">
-            <div class="modal-box bg-white rounded-2xl w-full max-w-xs p-6 shadow-2xl">
-                <div class="flex justify-center mb-4">
-                    <div class="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
-                        <i class="fa-solid fa-eraser text-red-600 text-2xl"></i>
-                    </div>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 text-center mb-2">すべて消去しますか？</h3>
-                <p class="text-sm text-gray-500 text-center mb-6 leading-relaxed">消去後、新しいタイムスタンプが自動で挿入されます。</p>
-                <div class="flex gap-3">
-                    <button onclick="app.closeDeleteModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors active:scale-95">
-                        キャンセル
-                    </button>
-                    <button onclick="app.confirmDelete()" class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 shadow-sm transition-colors active:scale-95">
-                        消去して新規
-                    </button>
-                </div>
+            <div class="modal-title" id="modalTitle">すべて消去しますか？</div>
+            <div class="modal-desc" id="modalDesc">消去後、新しいタイムスタンプが<br>自動で挿入されます。</div>
+            <div class="modal-btns">
+                <button class="modal-btn modal-btn-cancel" id="btnModalCancel">残す</button>
+                <button class="modal-btn modal-btn-confirm" id="btnModalConfirm">消去して新規</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        /**
-         * アプリケーションロジック
-         */
-        const app = {
-            STORAGE_KEY: 'quickShareMemo',
-            dom: {},
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
-            /**
-             * 初期化処理
-             */
-            init() {
-                // DOM要素のキャッシュ
-                this.dom = {
-                    memoInput: document.getElementById('memoInput'),
-                    charCount: document.getElementById('charCount'),
-                    deleteModal: document.getElementById('deleteModal')
-                };
+<script>
+    const STORAGE_KEY = 'quickShareMemo';
+    const DAYS = ['日', '月', '火', '水', '木', '金', '土'];
 
-                // イベントリスナーの設定
-                this.dom.memoInput.addEventListener('input', () => {
-                    this.saveMemo();
-                    this.updateCharCount();
-                });
+    const el = {
+        input:        document.getElementById('memoInput'),
+        charCount:    document.getElementById('charCount'),
+        deleteModal:  document.getElementById('deleteModal'),
+        toast:        document.getElementById('toast'),
+        btnDiary:     document.getElementById('btnDiary'),
+        btnTime:      document.getElementById('btnTime'),
+        btnTrash:     document.getElementById('btnTrash'),
+        btnCopy:      document.getElementById('btnCopy'),
+        btnShare:     document.getElementById('btnShare'),
+        btnModalCancel:  document.getElementById('btnModalCancel'),
+        btnModalConfirm: document.getElementById('btnModalConfirm'),
+        modalIcon:    document.getElementById('modalIcon'),
+        modalIconEl:  document.getElementById('modalIconEl'),
+        modalTitle:   document.getElementById('modalTitle'),
+        modalDesc:    document.getElementById('modalDesc'),
+    };
 
-                // モーダル外クリックで閉じる
-                this.dom.deleteModal.addEventListener('click', (e) => {
-                    if (e.target === this.dom.deleteModal) this.closeDeleteModal();
-                });
+    // --- Utils ---
 
-                // データのロード
-                this.loadMemo();
+    function getFormattedDate() {
+        const now = new Date();
+        const y  = now.getFullYear();
+        const mo = String(now.getMonth() + 1).padStart(2, '0');
+        const d  = String(now.getDate()).padStart(2, '0');
+        const dy = DAYS[now.getDay()];
+        const h  = String(now.getHours()).padStart(2, '0');
+        const mi = String(now.getMinutes()).padStart(2, '0');
+        return `${y}/${mo}/${d}(${dy}) ${h}:${mi}`;
+    }
 
-                // iOS/Androidでのキーボード表示時のビューポート調整
-                if (window.visualViewport) {
-                    window.visualViewport.addEventListener('resize', () => {
-                        document.body.style.height = window.visualViewport.height + 'px';
-                        // スクロール位置を調整して入力欄が見えるようにする
-                        window.scrollTo(0, 0);
-                    });
-                }
-            },
+    function saveMemo() {
+        localStorage.setItem(STORAGE_KEY, el.input.value);
+    }
 
-            /**
-             * 日時フォーマット生成
-             * @returns {string} YYYY/MM/DD(Day) HH:mm
-             */
-            getFormattedDate() {
-                const now = new Date();
-                const days = ['日', '月', '火', '水', '木', '金', '土'];
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const date = String(now.getDate()).padStart(2, '0');
-                const day = days[now.getDay()];
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                return `${year}/${month}/${date}(${day}) ${hours}:${minutes}`;
-            },
+    function updateCharCount() {
+        el.charCount.textContent = el.input.value.length + '文字';
+    }
 
-            /**
-             * メモの読み込み
-             */
-            loadMemo() {
-                const saved = localStorage.getItem(this.STORAGE_KEY);
-                if (saved) {
-                    this.dom.memoInput.value = saved;
-                } else {
-                    this.resetWithTimestamp(false);
-                }
-                this.updateCharCount();
-            },
+    function insertTextAtCursor(text) {
+        const start = el.input.selectionStart;
+        const end   = el.input.selectionEnd;
+        const cur   = el.input.value;
+        el.input.value = cur.substring(0, start) + text + cur.substring(end);
+        const pos = start + text.length;
+        saveMemo();
+        updateCharCount();
+        setTimeout(() => {
+            el.input.focus();
+            el.input.setSelectionRange(pos, pos);
+        }, 0);
+    }
 
-            /**
-             * メモの保存
-             */
-            saveMemo() {
-                localStorage.setItem(this.STORAGE_KEY, this.dom.memoInput.value);
-            },
+    function resetWithTimestamp(shouldFocus) {
+        const newText = getFormattedDate() + '\n';
+        el.input.value = newText;
+        saveMemo();
+        updateCharCount();
+        if (shouldFocus) {
+            setTimeout(() => {
+                el.input.focus();
+                el.input.setSelectionRange(newText.length, newText.length);
+            }, 0);
+        }
+    }
 
-            /**
-             * 文字数カウントの更新
-             */
-            updateCharCount() {
-                const count = this.dom.memoInput.value.length;
-                this.dom.charCount.textContent = count + '文字';
-            },
+    let toastTimer = null;
+    function showToast(msg) {
+        el.toast.textContent = msg;
+        el.toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.toast.classList.remove('show'), 1800);
+    }
 
-            /**
-             * リセットしてタイムスタンプ挿入
-             */
-            resetWithTimestamp(shouldFocus = true) {
-                const timestamp = this.getFormattedDate();
-                const newText = timestamp + '\n';
-                this.dom.memoInput.value = newText;
-                this.saveMemo();
-                this.updateCharCount();
-                
-                if (shouldFocus) {
-                    // DOM更新後にフォーカスを当てるため少し待つ
-                    setTimeout(() => {
-                        this.dom.memoInput.focus();
-                        this.dom.memoInput.setSelectionRange(newText.length, newText.length);
-                    }, 0);
-                }
-            },
+    // ボタンに一時的な成功フィードバック
+    let btnResetTimer = null;
+    function flashSuccess(btn) {
+        clearTimeout(btnResetTimer);
+        btn.classList.add('success');
+        // アイコン → チェックマークに差し替え
+        const icon = btn.querySelector('i');
+        const origClass = icon.className;
+        icon.className = 'fa-solid fa-check';
+        btnResetTimer = setTimeout(() => {
+            btn.classList.remove('success');
+            icon.className = origClass;
+        }, 1500);
+    }
 
-            /**
-             * 共通テキスト挿入処理
-             * @param {string} textToInsert 挿入するテキスト
-             */
-            insertTextAtCursor(textToInsert) {
-                const input = this.dom.memoInput;
-                const start = input.selectionStart;
-                const end = input.selectionEnd;
-                const currentText = input.value;
+    // --- Modal ---
 
-                // テキストを挿入（選択範囲があれば置換）
-                const newText = currentText.substring(0, start) + textToInsert + currentText.substring(end);
-                const newCursorPos = start + textToInsert.length;
+    // mode: 'delete' | 'post-copy' | 'post-share'
+    function openModal(mode) {
+        if (mode === 'delete') {
+            if (el.input.value.trim().length === 0) return;
+            el.modalIcon.className = 'modal-icon';
+            el.modalIconEl.className = 'fa-solid fa-eraser';
+            el.modalTitle.textContent = 'すべて消去しますか？';
+            el.modalDesc.innerHTML = '消去後、新しいタイムスタンプが<br>自動で挿入されます。';
+            el.btnModalCancel.textContent = 'キャンセル';
+            el.btnModalConfirm.textContent = '消去して新規';
+        } else {
+            const label = mode === 'post-copy' ? 'コピー' : '共有';
+            el.modalIcon.className = 'modal-icon green';
+            el.modalIconEl.className = 'fa-solid fa-check';
+            el.modalTitle.textContent = `${label}しました！`;
+            el.modalDesc.innerHTML = 'メモの内容を消去して<br>新しく書き始めますか？';
+            el.btnModalCancel.textContent = '残す';
+            el.btnModalConfirm.textContent = '消去して新規';
+        }
+        el.deleteModal.classList.add('active');
+    }
 
-                input.value = newText;
-                this.saveMemo();
-                this.updateCharCount();
-                
-                // フォーカスを戻してカーソル位置を更新
-                setTimeout(() => {
-                    input.focus();
-                    input.setSelectionRange(newCursorPos, newCursorPos);
-                }, 0);
-            },
+    function closeDeleteModal() {
+        el.deleteModal.classList.remove('active');
+    }
 
-            /**
-             * カーソル位置に日時を挿入
-             */
-            insertTime() {
-                this.insertTextAtCursor(this.getFormattedDate());
-            },
+    // --- Actions ---
 
-            /**
-             * 日記テンプレートを挿入
-             */
-            insertDiary() {
-                // 要望のテンプレート
-                const template = '\n(1)今日の失敗・悪かったこと\n(2)嬉しかったこと・感動したこと\n(3)明日の目標\n';
-                this.insertTextAtCursor(template);
-            },
+    async function copyToClipboard(fromBtn) {
+        const text = el.input.value;
+        if (!text.trim()) return false;
+        try {
+            await navigator.clipboard.writeText(text);
+            if (fromBtn) flashSuccess(el.btnCopy);
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    }
 
-            /**
-             * 削除確認モーダルを表示
-             */
-            openDeleteModal() {
-                if (this.dom.memoInput.value.trim().length === 0) return;
-                this.dom.deleteModal.classList.add('active');
-            },
-
-            /**
-             * 削除確認モーダルを閉じる
-             */
-            closeDeleteModal() {
-                this.dom.deleteModal.classList.remove('active');
-            },
-
-            /**
-             * 削除実行
-             */
-            confirmDelete() {
-                this.resetWithTimestamp(true);
-                this.closeDeleteModal();
-            },
-
-            /**
-             * クリップボードにコピー
-             */
-            async copyToClipboard() {
-                const text = this.dom.memoInput.value;
-                if (!text.trim()) return;
-
-                try {
-                    await navigator.clipboard.writeText(text);
-                } catch (err) {
-                    console.error('Failed to copy', err);
-                }
-            },
-
-            /**
-             * 共有機能（Web Share API）
-             */
-            async shareText() {
-                const text = this.dom.memoInput.value;
-                if (!text.trim()) {
-                    this.dom.memoInput.focus();
-                    return;
-                }
-
-                if (navigator.share) {
-                    try {
-                        await navigator.share({ text: text });
-                    } catch (err) {
-                        // AbortError等は無視
-                    }
-                } else {
-                    // 非対応ブラウザの場合はコピーを実行
-                    this.copyToClipboard();
-                }
+    async function shareText() {
+        const text = el.input.value;
+        if (!text.trim()) { el.input.focus(); return; }
+        if (navigator.share) {
+            try {
+                await navigator.share({ text });
+                // share完了（キャンセルなら例外が飛ぶので↓は到達しない）
+                flashSuccess(el.btnShare);
+                setTimeout(() => openModal('post-share'), 400);
+            } catch (e) {
+                // AbortError = ユーザーキャンセル → 何もしない
             }
-        };
+        } else {
+            // フォールバック: コピー
+            const ok = await copyToClipboard(false);
+            if (ok) {
+                flashSuccess(el.btnShare);
+                setTimeout(() => openModal('post-copy'), 400);
+            }
+        }
+    }
 
-        // DOM構築完了後に初期化
-        document.addEventListener('DOMContentLoaded', () => app.init());
-    </script>
+    // --- Init ---
+
+    function init() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            el.input.value = saved;
+        } else {
+            resetWithTimestamp(false);
+        }
+        updateCharCount();
+
+        el.input.addEventListener('input', () => { saveMemo(); updateCharCount(); });
+
+        el.btnDiary.addEventListener('click', () => {
+            const tpl = '\n(1)今日の失敗・悪かったこと\n(2)嬉しかったこと・感動したこと\n(3)明日の目標\n';
+            insertTextAtCursor(tpl);
+        });
+
+        el.btnTime.addEventListener('click', () => insertTextAtCursor(getFormattedDate()));
+
+        el.btnTrash.addEventListener('click', () => openModal('delete'));
+
+        el.btnCopy.addEventListener('click', async () => {
+            const ok = await copyToClipboard(true);
+            if (ok) setTimeout(() => openModal('post-copy'), 400);
+        });
+
+        el.btnShare.addEventListener('click', shareText);
+
+        el.btnModalCancel.addEventListener('click', closeDeleteModal);
+
+        el.btnModalConfirm.addEventListener('click', () => {
+            resetWithTimestamp(true);
+            closeDeleteModal();
+        });
+
+        el.deleteModal.addEventListener('click', (e) => {
+            if (e.target === el.deleteModal) closeDeleteModal();
+        });
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                document.body.style.height = window.visualViewport.height + 'px';
+                window.scrollTo(0, 0);
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
